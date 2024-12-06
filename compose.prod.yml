@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  web:
+    build:
+      context: ./services/web
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:5000 manage:app
+    volumes:
+      - ./services/web/:/usr/src/app/
+      - /home/houfek/Work/MMCI/sequencing_pipeline/data-catalogue-playground/patient_predictive/:/exports
+    ports:
+      - 8080:5000
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data_prod:/var/lib/postgesql/data
+    env_file:
+      - ./.env.prod.db
+    ports:
+      - 5433:5432
+
+volumes:
+  postgres_data_prod:
