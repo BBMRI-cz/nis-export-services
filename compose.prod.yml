@@ -7,8 +7,7 @@ services:
       dockerfile: Dockerfile.prod
     command: gunicorn --bind 0.0.0.0:5000 manage:app
     volumes:
-      - ./services/web/:/usr/src/app/
-      - /home/houfek/Work/MMCI/sequencing_pipeline/data-catalogue-playground/patient_predictive/:/exports
+      - /home/mou/patient_data/:/exports
     ports:
       - 8080:5000
     env_file:

@@ -2,11 +2,12 @@ version: '3.8'
 
 services:
   web:
-    image: flask-test
+    build:
+      context: ./services/web
+      dockerfile: Dockerfile
     command: python manage.py run -h 0.0.0.0
     volumes:
-      - ./services/web/:/usr/src/app/
-      - ./../export/:/exports
+      - /mnt/c/Users/forma/Work_BBRMI/seq_pipeline_sandbox/exports:/exports
     ports:
       - 8080:5000
     env_file:
@@ -24,4 +25,4 @@ services:
 
 volumes:
   postgres_data:
-   
+
