@@ -54,6 +54,8 @@ def seed_db():
     db.session.add(MaterialType("Sérum dusík", "SD"))
     db.session.add(MaterialType("Plazma CTAD dusík", "T"))
     db.session.add(MaterialType("Plazma K3EDTA dusík", "K"))
+    db.session.add(MaterialType("Plná krev se stabilizátorem DNA", "PS"))
+    db.session.add(MaterialType("Plazma se stabilizátorem DNA", "C"))
     db.session.commit()
 
 
