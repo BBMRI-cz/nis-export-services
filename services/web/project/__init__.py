@@ -259,3 +259,7 @@ def get_patient_by_id(id):
         }), 200
     else:
         return jsonify(None), 404
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify(status="ok"), 200
