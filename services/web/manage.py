@@ -1,7 +1,7 @@
 from flask.cli import FlaskGroup
 import xml.etree.ElementTree as ET
 import os
-from project import app, db, Patient, Tissue, Cell, Serum, Genome, DiagnosisMaterial, Sex, RetrievalType, MaterialType
+from project import AccessionNumber, app, db, Patient, Tissue, Cell, Serum, Genome, DiagnosisMaterial, Sex, RetrievalType, MaterialType
 
 cli = FlaskGroup(app)
 
@@ -64,11 +64,24 @@ def _process_xml_export(rt):
     sample_data = []
     lts = rt.find(f"{XLM_PREFIX}LTS")
     birth_date = f'{rt.get("month").replace("--", "")}-01-{rt.get("year")}'
-    sample_data.append(Patient(
-        id=rt.get("id"),
-        birth_date=birth_date,
-        sex=sex_dict[rt.get("sex")],
-        consent=bool_dict[rt.get("consent")]))
+    patient = Patient(
+            id=int(rt.get("id")),
+            birth_date=birth_date,
+            sex=sex_dict[rt.get("sex")],
+            consent=bool_dict[rt.get("consent")]
+        )
+
+    accession_numbers = [
+        num.text
+        for num in rt.findall(f".//{XLM_PREFIX}AccessionNumbers/{XLM_PREFIX}Number")
+        if num.text is not None
+    ]
+    for number in accession_numbers:
+        patient.accession_numbers.append(AccessionNumber(number=number))
+
+    sample_data.append(patient)
+
+
     if lts is not None:
         for child in lts:
             if "tissue" in child.tag:
