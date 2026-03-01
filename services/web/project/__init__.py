@@ -35,11 +35,24 @@ class Patient(db.Model):
     sex = db.Column(Enum(Sex), nullable=False)
     consent = db.Column(db.Boolean, nullable=False)
 
+    accession_numbers = db.relationship(
+        "AccessionNumber",
+        back_populates="patient",
+    )
+
     def __init__(self, id, birth_date, sex, consent):
         self.id = id
         self.birth_date = birth_date
         self.sex = sex
         self.consent = consent
+
+class AccessionNumber(db.Model):
+    __tablename__ = "accession_number"
+
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.String(128), nullable=False, unique=True, index=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    patient = db.relationship("Patient", back_populates="accession_numbers")
 
 
 class Tissue(db.Model):
