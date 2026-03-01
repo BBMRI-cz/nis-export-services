@@ -273,6 +273,24 @@ def get_patient_by_id(id):
     else:
         return jsonify(None), 404
 
+@app.route("/api/accession_numbers/<number>/patient", methods=["GET"])
+def get_patient_by_accession(number):
+    accession = db.session.execute(
+        db.select(AccessionNumber).filter_by(number=number)
+    ).scalar_one_or_none()
+
+    if accession is None:
+        return jsonify({"error": "Accession number not found"}), 404
+
+    patient = accession.patient
+
+    return jsonify({
+        "ID": patient.id,
+        "birth_date": patient.birth_date,
+        "sex": int(patient.sex),
+        "consent": patient.consent
+    }), 200
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify(status="ok"), 200
