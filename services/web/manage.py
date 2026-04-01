@@ -59,7 +59,7 @@ def seed_db():
     db.session.commit()
 
 
-def _process_xml_export(rt):
+def _process_xml_export(rt, accession_cache):
     mat_type_dict = dict([(val[0].key, int(val[0].id)) for val in db.session.execute(db.select(MaterialType)).all()])
     sample_data = []
     lts = rt.find(f"{XLM_PREFIX}LTS")
@@ -70,21 +70,19 @@ def _process_xml_export(rt):
             sex=sex_dict[rt.get("sex")],
             consent=bool_dict[rt.get("consent")]
         )
-
-    accession_numbers = [
+    accession_numbers = {
         num.text
         for num in rt.findall(f".//{XLM_PREFIX}AccessionNumbers/{XLM_PREFIX}Number")
         if num.text is not None
-    ]
+    }
     for number in accession_numbers:
-        existing = db.session.execute(
-            db.select(AccessionNumber).filter_by(number=number)
-        ).scalar_one_or_none()
-
-        if existing:
-            patient.accession_numbers.append(existing)
+        if number in accession_cache:
+            patient.accession_numbers.append(accession_cache[number])
         else:
-            patient.accession_numbers.append(AccessionNumber(number=number))
+            new_an = AccessionNumber(number=number)
+            db.session.add(new_an)
+            patient.accession_numbers.append(new_an)
+            accession_cache[number] = new_an
 
     sample_data.append(patient)
 
@@ -172,12 +170,16 @@ def _upload_new_data_to_db(sample_data):
 
 @cli.command("fill_db")
 def fill_db():
+    accession_cache = {
+            an.number: an
+            for an in db.session.execute(db.select(AccessionNumber)).scalars()
+    }
     for file in os.listdir("/exports/"):
         try:
             tree = ET.parse(os.path.join("/exports", file))
         except ET.ParseError:
             print("Could not parse file:", file)
-        specimen = _process_xml_export(tree.getroot())
+        specimen = _process_xml_export(tree.getroot(), accession_cache)
         _upload_new_data_to_db(specimen)
     db.session.commit()
 
