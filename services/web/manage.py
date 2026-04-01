@@ -64,15 +64,18 @@ def _process_xml_export(rt, accession_cache):
     sample_data = []
     lts = rt.find(f"{XLM_PREFIX}LTS")
     birth_date = f'{rt.get("month").replace("--", "")}-01-{rt.get("year")}'
-    patient = Patient(
-            id=int(rt.get("id")),
+    patient_id = rt.get("id")
+    patient = db.session.get(Patient, patient_id)
+
+    if not patient:
+        patient = Patient(
+            id=patient_id,
             birth_date=birth_date,
             sex=sex_dict[rt.get("sex")],
             consent=bool_dict[rt.get("consent")]
         )
-
-    db.session.add(patient)
-    db.session.flush()
+        db.session.add(patient)
+        db.session.flush()
 
     accession_numbers = {
         num.text
