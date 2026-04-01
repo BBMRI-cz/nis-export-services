@@ -80,7 +80,6 @@ def _process_xml_export(rt, accession_cache):
             patient.accession_numbers.append(accession_cache[number])
         else:
             new_an = AccessionNumber(number=number)
-            db.session.add(new_an)
             patient.accession_numbers.append(new_an)
             accession_cache[number] = new_an
 
