@@ -77,7 +77,14 @@ def _process_xml_export(rt):
         if num.text is not None
     ]
     for number in accession_numbers:
-        patient.accession_numbers.append(AccessionNumber(number=number))
+        existing = db.session.execute(
+            db.select(AccessionNumber).filter_by(number=number)
+        ).scalar_one_or_none()
+
+        if existing:
+            patient.accession_numbers.append(existing)
+        else:
+            patient.accession_numbers.append(AccessionNumber(number=number))
 
     sample_data.append(patient)
 
