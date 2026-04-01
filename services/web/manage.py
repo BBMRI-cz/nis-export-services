@@ -70,6 +70,10 @@ def _process_xml_export(rt, accession_cache):
             sex=sex_dict[rt.get("sex")],
             consent=bool_dict[rt.get("consent")]
         )
+
+    db.session.add(patient)
+    db.session.flush()
+
     accession_numbers = {
         num.text
         for num in rt.findall(f".//{XLM_PREFIX}AccessionNumbers/{XLM_PREFIX}Number")
